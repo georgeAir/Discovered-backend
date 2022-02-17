@@ -6,6 +6,7 @@ const playlistSchema = new Schema({
   title: {type: String, require: true},
   artist: {type: String, default: false},
   album: {type: String, default: false},
+  img: {type: String},
 })
 
 module.exports = model('Playlist', playlistSchema)

@@ -6,9 +6,11 @@ const MONGODB_URI = process.env.MONGODB_URI
 const cors = require('cors');
 const session = require('express-session')
 const apiKey = process.env.REACT_APP_API_KEY
-const PORT = 3003
-// const MongoDBStore = require('connect-mongodb-session')(session)
-// const apiKey = "ue2_GLAE9FpEp0NX5hhSw_6qzFoN-MlrnL1Sm7BJUnuixUy4u3MnLp_FqUxqpbyMTzqkqLujFbQRfOgFZUP19cxZo5da-uDeU3OnQJ1KhmPZg1LZssAXl494sszyYXYx"
+const spotifyWebApi = require('spotify-web-api-node')
+const bodyParser = require("body-parser")
+// const lyricsFinder = require("lyrics-finder")
+const PORT = 3001
+
 const client = '68c3d880825447e29248824c775e403b'
 
 //SETUP CORS middleware
@@ -71,39 +73,69 @@ const isAuthenticated = (req, res, next) => {
 
 //this will tell server to parse JSON data, and create req.body object.
 app.use(express.json())
-
+app.use(cors())
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: true }))
 
 
 //controllers
 app.use('/playlists', require('./controllers/playlistsController'));
 
 
-app.get('/yelp/', (req, res) => {
-  const searchRequest = {
-    all: req.params.term,
-    location: 'chicago'
-  }
+app.post("/refresh", (req, res) => {
+  const refreshToken = req.body.refreshToken
+  const spotifyApi = new SpotifyWebApi({
+    redirectUri: process.env.REDIRECT_URI,
+    clientId: process.env.CLIENT_ID,
+    clientSecret: process.env.CLIENT_SECRET,
+    refreshToken,
+  })
 
-  client.search(searchRequest)
-  .then(response => response.jsonBody.businesses)
-  .then(data => res.send(data));
+  spotifyApi
+    .refreshAccessToken()
+    .then(data => {
+      res.json({
+        accessToken: data.body.accessToken,
+        expiresIn: data.body.expiresIn,
+      })
+    })
+    .catch(err => {
+      console.log(err)
+      res.sendStatus(400)
+    })
 })
 
+app.post("/login", (req, res) => {
+  const code = req.body.code
+  const spotifyApi = new SpotifyWebApi({
+    redirectUri: process.env.REDIRECT_URI,
+    clientId: process.env.CLIENT_ID,
+    clientSecret: process.env.CLIENT_SECRET,
+  })
 
-app.get('/yelp/:term', (req, res) => {
-  const searchRequest = {
-    term: req.params.term,
-    location: 'chicago'
-  }
+  spotifyApi
+    .authorizationCodeGrant(code)
+    .then(data => {
+      res.json({
+        accessToken: data.body.access_token,
+        refreshToken: data.body.refresh_token,
+        expiresIn: data.body.expires_in,
+      })
+    })
+    .catch(err => {
+      res.sendStatus(400)
+    })
+})
 
-  client.search(searchRequest)
-  .then(response => response.jsonBody.businesses)
-  .then(data => res.send(data));
+app.get("/lyrics", async (req, res) => {
+  const lyrics =
+    (await lyricsFinder(req.query.artist, req.query.track)) || "No Lyrics Found"
+  res.json({ lyrics })
 })
 
 
 
 
 app.listen(PORT, ()=> {
-    console.log('listening on port 3003')
+    console.log('listening on port 3001')
 })
