@@ -14,7 +14,7 @@ const PORT = process.env.PORT
 const client = '68c3d880825447e29248824c775e403b'
 
 //SETUP CORS middleware
-const whitelist = ['http://localhost:3000', '']
+const whitelist = ['http://localhost:3000', 'https://discovrd.herokuapp.com','https://discovrd.herokuapp.com/playlists']
 const corsOptions = {
     origin: (origin, callback) => {
         if(whitelist.indexOf(origin) !== -1 || !origin){
