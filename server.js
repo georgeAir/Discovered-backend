@@ -127,14 +127,6 @@ app.post("/login", (req, res) => {
     })
 })
 
-app.get("/lyrics", async (req, res) => {
-  const lyrics =
-    (await lyricsFinder(req.query.artist, req.query.track)) || "No Lyrics Found"
-  res.json({ lyrics })
-})
-
-
-
 
 app.listen(PORT, ()=> {
     console.log('listening on port 3001')
