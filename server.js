@@ -9,7 +9,7 @@ const apiKey = process.env.REACT_APP_API_KEY
 const spotifyWebApi = require('spotify-web-api-node')
 const bodyParser = require("body-parser")
 // const lyricsFinder = require("lyrics-finder")
-const PORT = 3001
+const PORT = process.env.PORT
 
 const client = '68c3d880825447e29248824c775e403b'
 
