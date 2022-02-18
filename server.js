@@ -81,6 +81,10 @@ app.use(bodyParser.urlencoded({ extended: true }))
 //controllers
 app.use('/playlists', require('./controllers/playlistsController'));
 
+app.get('/', (req,res) => {
+  res.send("Home Page")
+})
+
 
 app.post("/refresh", (req, res) => {
   const refreshToken = req.body.refreshToken
